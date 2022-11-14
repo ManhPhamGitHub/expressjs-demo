@@ -1,12 +1,14 @@
 const userController = require('../controllers/user')
 
 const routes = (app) => {
-    app.route('/user')
-        .get(userController.getUser);
-    app.route('/user-with-cache')
-        .get(userController.getUserWithRedis)
-    app.route('/delete-all-caching')
-        .get(userController.deleteAllDataCaching)
+    app.route('/admin')
+        .get(userController.admin)
+    app.route('/delete')
+        .post(userController.deleteUser)
+    app.route('/add-user')
+        .get(userController.viewAddUser)
+    app.route('/add-user')
+        .post(userController.addUser)
 }
 
 module.exports = routes

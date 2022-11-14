@@ -5,6 +5,9 @@ const userSchema = new mongoose.Schema({
     },
     age: {
         type: String
+    },
+    imageUrl: {
+        type: String
     }
 })
 

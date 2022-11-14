@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<main>
+<div class="row">
+  <div class="col-sm-8">
+    <a href="/add-user">ADD USER</a>
+  </div>
+  
+  <div class="col-sm-4">
+    <table>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Age
+                </th>
+            </tr>
+        <% listUsers?.forEach((user)=>{ %>
+            <tr>
+                <td>
+                    <p> <%= user.name %> </p> 
+                </td>
+                <td>
+                    <p> <%= user.age %> </p> 
+                </td>
+                <td>
+                    <button type="button" id="delete-user">delete</button>
+                </td>
+            </tr>
+        <% }) %>
+    </table>
+  </div>
+  
+</div>
+</main>
+
+<footer>
+  <%- include('./footer'); %>
+</footer>
+
+</body>
+</html>

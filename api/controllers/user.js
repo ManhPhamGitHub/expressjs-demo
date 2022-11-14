@@ -1,48 +1,45 @@
-const modelUser = require('../model/user')
-const redisCache = require('../services/redisServices')
-const getUser = async (req, res) => {
-    try {
-        const listUser = await modelUser.find();
-        res.send({ data: listUser, status: "success", message: "get list user successs" })
-    } catch (error) {
-        res.sendStatus(404).json({ error: error, status: 'failure', message: "get list user failure" });
-    }
+const { getUserWithRedis, deleteUserServices, addUserServices, uploadImageToS3 } = require('../services/user')
+const { generateSignedUrl, putObjectS3 } = require('../services/aws')
+const formidable = require('formidable')
+
+const admin = async (req, res) => {
+    const listUsers = await getUserWithRedis()
+    var headline = 'Framgia Viet Nam';
+    var tagline = "IT là lĩnh vực công bình và không giới hạn, nơi mỗi cá nhân được chia sẻ cơ hội và nhìn nhận thông qua nỗ lực thực sự. Tận dụng những lợi thế của IT mang lại, chúng tôi không ngừng hoàn thiện, trở thành nền tảng cho sự phát triển dịch vụ toàn cầu.";
+
+    res.render('admin', {
+        headline: headline,
+        listUsers: listUsers,
+    });
 }
 
-const getUserWithRedis = async (req, res) => {
-    try {
-        const keyUsers = 'users'
-        // get data from cache
-        const dataCaching = await redisCache.getRedisCacheByKey(keyUsers)
-        console.log("dataCaching", dataCaching);
-        if (dataCaching) {
-            // return if have data
-            return res.send({ data: JSON.parse(dataCaching), status: "success", message: "get list user successs" })
-        }
-        const listUser = await modelUser.find();
-        //save data from db in cache with time = 1 day
-        redisCache.setRedisCacheWithTime(keyUsers, 60 * 60 * 24, JSON.stringify(listUser))
-
-        res.send({ data: listUser, status: "success", message: "get list user successs" })
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(404).json({ error: error, status: 'failure', message: "get list user failure" });
-    }
+const deleteUser = async (req, res) => {
+    const deleteStatus = await deleteUserServices(req.body)
+    console.log("deleteStatus", deleteStatus);
+    res.send({ message: deleteStatus, status: 'success' })
 }
 
-const deleteAllDataCaching = async (req, res) => {
-    try {
-        const listKeys = await redisCache.getAllRedisKey() // get all keys from server 
-        listKeys.map(async (key) => await redisCache.deleteRedisKey(key)) // map all keys to delete it
-        res.send({ status: "success", message: "delete all data caching successs" })
-    } catch (error) {
-        res.sendStatus(404).json({ error: error, status: 'failure', message: "delete data caching failure" });
-    }
+const viewAddUser = async (req, res) => {
+    res.render('add-user')
 }
 
-
+const addUser = async (req, res) => {
+    // const preSignedUrl = await generateSignedUrl()
+    let data = {};
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        console.log(files);
+        data.name = fields.name;
+        data.age = fields.age;
+        let tmpPath = files.file.filepath;
+        let tenFile = files.file.originalFilename;
+    });
+    addUserServices({ data })
+    res.send('add-user')
+}
 module.exports = {
-    getUser,
-    getUserWithRedis,
-    deleteAllDataCaching
+    admin,
+    deleteUser,
+    viewAddUser,
+    addUser
 }
